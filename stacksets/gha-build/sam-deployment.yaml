@@ -1,0 +1,142 @@
+
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Managed Stack for AWS SAM CLI
+Metadata:
+  SamCliInfo:
+    version: 1.40.1
+    installationId: 7a9de6e3-49d4-472a-8dd1-203fde0b66e7
+Outputs:
+  SourceBucket:
+    Value:
+      Ref: SamCliSourceBucket
+Parameters:
+  BuildAccount:
+    Type: String
+    Description: "Whether or not this pipeline is a build account."
+    AllowedValues: ["true", "false"]
+    Default: "false"
+  AwsOrganizationId:
+    Type: String
+    Description: "AWS Org ID of accounts allowed to access S3 Bucket"
+
+
+Conditions:
+  IsBuildAccount: !Equals [!Ref BuildAccount, "true"]
+
+
+Resources:
+  SamCliSourceBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'aws-sam-cli-sourcebucket-${AWS::AccountId}-${AWS::Region}'
+      # Have Bucket policy handle these things. Otherwise we can end up with conflicts that
+      # break configuration.
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: aws:kms
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+      - Key: ManagedStackSource
+        Value: AwsSamCli
+
+  SamCliSourceBucketBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: SamCliSourceBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+            - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${SamCliSourceBucket}/*"
+            Principal:
+              Service: serverlessrepo.amazonaws.com
+            Condition:
+              StringEquals:
+                aws:SourceAccount:
+                  Ref: AWS::AccountId
+          - Action:
+            - s3:*
+            Effect: Deny
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${SamCliSourceBucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${SamCliSourceBucket}/*"
+            Principal: "*"
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+          - Fn::If:
+            - IsBuildAccount
+            - Action:
+                - 's3:List*'
+                - 's3:GetBucket*'
+              Effect: "Allow"
+              Resource:
+                - !GetAtt SamCliSourceBucket.Arn
+              Principal: "*"
+              Condition:
+                StringEquals:
+                  "aws:PrincipalOrgID":
+                    - !Ref AwsOrganizationId
+            - !Ref AWS::NoValue
+          - Fn::If:
+            - IsBuildAccount
+            - Sid: AllowOrgAccess
+              Action:
+                - 's3:DeleteObject'
+                - 's3:GetObject*'
+                - 's3:List*'
+                - 's3:PutObject*'
+              Effect: "Allow"
+              Resource:
+                - !Sub "${SamCliSourceBucket.Arn}/nbcuniversal/*"
+                - !Sub "${SamCliSourceBucket.Arn}/*.template"
+              Principal: "*"
+              Condition:
+                StringEquals:
+                  "aws:PrincipalOrgID":
+                    - !Ref AwsOrganizationId
+            - !Ref AWS::NoValue
+          - Fn::If:
+            - IsBuildAccount
+            - Sid: DenyMainArtifactDeletes
+              Action:
+                - 's3:DeleteObject'
+              Effect: "Deny"
+              Resource:
+                - !Sub "${SamCliSourceBucket.Arn}/nbcuniversal/*/main/*"
+                - !Sub "${SamCliSourceBucket.Arn}/*.template"
+              Principal: "*"
+              Condition:
+                StringEquals:
+                  "aws:PrincipalOrgID":
+                    - !Ref AwsOrganizationId
+            - !Ref AWS::NoValue
+
+  SamDeployBucketNameSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/org/cicd/SamDeployBucketName"
+      Type: "String"
+      Description: "Name of SAM Deploy bucket"
+      Value: !Ref SamCliSourceBucket
+
+  SamDeployBucketArnSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/org/cicd/SamDeployBucketArn"
+      Type: "String"
+      Description: "ARN of SAM Deploy bucket"
+      Value: !GetAtt SamCliSourceBucket.Arn

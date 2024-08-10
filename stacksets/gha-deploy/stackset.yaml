@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS account infrastructure stackset (GHA Deployments)
+
+Parameters:
+  StacksetTemplateBucket:
+    Type: String
+    Description: S3 bucket for stackset templates
+  TargetOuIds:
+    Type: CommaDelimitedList
+    Description: List of OUs
+  TargetRegions:
+    Type: CommaDelimitedList
+    Description: Regions to deploy to
+  CicdAwsAccountId:
+    Type: String
+    Description: AWS Account ID for CI/CD
+  DeployBucketArn:
+    Type: String
+    Description: S3 bucket ARN for deployment
+
+Resources:
+  OrgCiCdGhaDeploy:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: OrgCiCdGhaDeploy
+      Description: GHA CI/CD Deployment
+      Parameters:
+        - ParameterKey: CicdAwsAccountId
+          ParameterValue: !Ref CicdAwsAccountId
+        - ParameterKey: DeployBucketArn
+          ParameterValue: !Ref DeployBucketArn
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref TargetOuIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-deploy/template.yaml

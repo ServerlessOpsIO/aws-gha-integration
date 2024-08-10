@@ -1,0 +1,72 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS account infrastructure stackset (GHA Build)
+
+Parameters:
+  StacksetTemplateBucket:
+    Type: String
+    Description: S3 bucket for stackset templates
+  TargetOuIds:
+    Type: CommaDelimitedList
+    Description: List of OUs
+  TargetRegions:
+    Type: CommaDelimitedList
+    Description: Regions to deploy to
+  AwsOrganizationId:
+    Type: String
+    Description: AWS Organization ID
+
+Resources:
+  OrgCiCdSamArtifacts:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: OrgCiCdSamArtifacts
+      Description: AWS SAM Deployment
+      Parameters:
+        - ParameterKey: AwsOrganizationId
+          ParameterValue: !Ref AwsOrganizationId
+        - ParameterKey: BuildAccount
+          ParameterValue: 'true'
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref TargetOuIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-build/sam-deployment.yaml
+
+  OrgCiCdGhaBuild:
+    Type: AWS::CloudFormation::StackSet
+    DependsOn: OrgCiCdSamArtifacts
+    Properties:
+      StackSetName: OrgCiCdGhaBuild
+      Description: GHA CI/CD Deployment Build
+      Parameters:
+        - ParameterKey: DeployBucketArn
+          ParameterValue: '/org/cicd/SamDeployBucketArn'
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref TargetOuIds
+          Regions: !Ref TargetRegions
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-build/template.yaml
