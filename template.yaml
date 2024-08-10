@@ -16,6 +16,9 @@ Parameters:
   CicdAwsAccountId:
     Type: String
     Description: AWS Account ID for CI/CD
+  CiCdOuIds:
+    Type: String
+    Description: Comma separated listist of OUs
 
 Resources:
   StacksetTemplateBucket:
@@ -29,7 +32,7 @@ Resources:
       Location: './stacksets/gha-build/stackset.yaml'
       Parameters:
         StacksetTemplateBucket: !Ref StacksetTemplateBucket
-        TargetOuIds: !Ref TargetOuIds
+        TargetOuIds: !Ref CiCdOuIds
         TargetRegions: !Ref TargetRegions
         AwsOrganizationId: !Ref AwsOrganizationId
 
