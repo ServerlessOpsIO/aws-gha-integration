@@ -42,7 +42,6 @@ Resources:
     Properties:
       Location: './stacksets/gha-deploy/stackset.yaml'
       Parameters:
-        StacksetTemplateBucket: !Ref StacksetTemplateBucket
         TargetOuIds: !Ref TargetOuIds
         TargetRegions: !Ref TargetRegions
         CicdAwsAccountId: !Ref CicdAwsAccountId

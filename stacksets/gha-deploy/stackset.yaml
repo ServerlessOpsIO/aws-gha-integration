@@ -1,11 +1,11 @@
+Metadata:
+  TemplateBody: &template_body ./template.yaml
+
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS account infrastructure stackset (GHA Deployments)
 
 Parameters:
-  StacksetTemplateBucket:
-    Type: String
-    Description: S3 bucket for stackset templates
   TargetOuIds:
     Type: CommaDelimitedList
     Description: List of OUs
@@ -46,4 +46,4 @@ Resources:
         FailureToleranceCount: 1
         MaxConcurrentCount: 5
       PermissionModel: SERVICE_MANAGED
-      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-deploy/template.yaml
+      TemplateBody: *template_body
