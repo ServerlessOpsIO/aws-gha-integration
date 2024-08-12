@@ -1,4 +1,7 @@
 
+Metadata:
+  TemplateBody: &template_body ./template.yaml
+
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS account infrastructure stackset (GHA Build)
@@ -69,4 +72,4 @@ Resources:
         FailureToleranceCount: 1
         MaxConcurrentCount: 5
       PermissionModel: SERVICE_MANAGED
-      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-build/template.yaml
+      TemplateBody: *template_body
