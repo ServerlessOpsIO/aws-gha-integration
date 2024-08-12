@@ -21,17 +21,11 @@ Parameters:
     Description: Comma separated listist of OUs
 
 Resources:
-  StacksetTemplateBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${AWS::StackName}-stacksets-${AWS::AccountId}-${AWS::Region}"
-
   GhaBuildStackSet:
     Type: AWS::Serverless::Application
     Properties:
       Location: './stacksets/gha-build/stackset.yaml'
       Parameters:
-        StacksetTemplateBucket: !Ref StacksetTemplateBucket
         TargetOuIds: !Ref CiCdOuIds
         TargetRegions: !Ref TargetRegions
         AwsOrganizationId: !Ref AwsOrganizationId

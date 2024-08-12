@@ -1,15 +1,15 @@
 
 Metadata:
-  TemplateBody: &template_body ./template.yaml
+  GhaStack:
+    localTemplateFile: &gha_template_body ./sam-deployment.yaml
+  SamStack:
+    localTemplateFile: &sam_template_body ./template.yaml
 
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS account infrastructure stackset (GHA Build)
 
 Parameters:
-  StacksetTemplateBucket:
-    Type: String
-    Description: S3 bucket for stackset templates
   TargetOuIds:
     Type: CommaDelimitedList
     Description: List of OUs
@@ -45,7 +45,7 @@ Resources:
         FailureToleranceCount: 1
         MaxConcurrentCount: 5
       PermissionModel: SERVICE_MANAGED
-      TemplateURL: !Sub https://${StacksetTemplateBucket}.s3.amazonaws.com/gha-build/sam-deployment.yaml
+      TemplateBody: *sam_template_body
 
   OrgCiCdGhaBuild:
     Type: AWS::CloudFormation::StackSet
@@ -72,4 +72,4 @@ Resources:
         FailureToleranceCount: 1
         MaxConcurrentCount: 5
       PermissionModel: SERVICE_MANAGED
-      TemplateBody: *template_body
+      TemplateBody: *gha_template_body
