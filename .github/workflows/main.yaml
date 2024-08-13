@@ -62,7 +62,7 @@ jobs:
             _dir="$(dirname $_f)/" \
             yq \
               -i \
-              "(.. | select(has("localTemplateFile")) | .localTemplateFile) |= load_str(strenv(_dir) + .)" \
+              '(.. | select(has("localTemplateFile")) | .localTemplateFile) |= load_str(strenv(_dir) + .)' \
               $_f;
           done
 
