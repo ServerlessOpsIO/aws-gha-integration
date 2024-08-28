@@ -126,9 +126,6 @@ Resources:
                   - 'ecr:GetDownloadUrlForLayer'
                 Resource:
                   - !Sub "arn:${AWS::Partition}:ecr:*:${CicdAwsAccountId}:repository/*"
-      Tags:
-        - Key: nbcu:cicd:Role
-          Value: GitHubActionsDeployIamRole
 
   CfnExecIamRole:
     Type: AWS::IAM::Role
@@ -145,10 +142,6 @@ Resources:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
-      Tags:
-        - Key: nbcu:cicd:Role
-          Value: CfnExecIamRole
-
 
   ###
   #SSM Parameters
