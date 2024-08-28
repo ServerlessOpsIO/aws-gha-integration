@@ -100,6 +100,20 @@ Resources:
                 Resource:
                   - !Sub "${DeployBucketArn}/serverlessopsio/*/main/*"
                   - !Sub "${DeployBucketArn}/*.template"
+        - PolicyName: WritableS3Buckets
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:DeleteObject'
+                  - 's3:GetObject*'
+                  - 's3:List*'
+                  - 's3:PutObject*'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    "aws:ResourceTag/org:cicd:writable": "true"
         - PolicyName: S3Sse
           PolicyDocument:
             Version: "2012-10-17"
