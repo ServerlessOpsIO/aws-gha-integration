@@ -101,7 +101,7 @@ Resources:
                 - 's3:PutObject*'
               Effect: "Allow"
               Resource:
-                - !Sub "${SamCliSourceBucket.Arn}/nbcuniversal/*"
+                - !Sub "${SamCliSourceBucket.Arn}/serverlessopsio/*"
                 - !Sub "${SamCliSourceBucket.Arn}/*.template"
               Principal: "*"
               Condition:
@@ -116,7 +116,7 @@ Resources:
                 - 's3:DeleteObject'
               Effect: "Deny"
               Resource:
-                - !Sub "${SamCliSourceBucket.Arn}/nbcuniversal/*/main/*"
+                - !Sub "${SamCliSourceBucket.Arn}/serverlessopsio/*/main/*"
                 - !Sub "${SamCliSourceBucket.Arn}/*.template"
               Principal: "*"
               Condition:
