@@ -111,9 +111,9 @@ Resources:
                   - 's3:List*'
                   - 's3:PutObject*'
                 Resource: '*'
-                Condition:
-                  StringEquals:
-                    "aws:ResourceTag/org:cicd:writable": "true"
+                #Condition:
+                #  StringEquals:
+                #    "aws:ResourceTag/org:cicd:writable": "true"
         - PolicyName: S3Sse
           PolicyDocument:
             Version: "2012-10-17"
