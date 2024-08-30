@@ -112,8 +112,8 @@ Resources:
                   - 's3:PutObject*'
                 Resource: '*'
                 Condition:
-                  Bool:
-                    "aws:ResourceTag/org:cicd:writable": "true"
+                  StringEquals:
+                    "aws:ResourceAccount": !Ref AWS::AccountId
         - PolicyName: S3Sse
           PolicyDocument:
             Version: "2012-10-17"
