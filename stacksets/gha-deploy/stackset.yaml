@@ -25,6 +25,7 @@ Resources:
     Properties:
       StackSetName: OrgCiCdGhaDeploy
       Description: GHA CI/CD Deployment
+      CallAs: DELEGATED_ADMIN
       Parameters:
         - ParameterKey: CicdAwsAccountId
           ParameterValue: !Ref CicdAwsAccountId

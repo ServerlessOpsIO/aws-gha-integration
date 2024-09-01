@@ -26,6 +26,7 @@ Resources:
     Properties:
       StackSetName: OrgCiCdSamArtifacts
       Description: AWS SAM Deployment
+      CallAs: DELEGATED_ADMIN
       Parameters:
         - ParameterKey: AwsOrganizationId
           ParameterValue: !Ref AwsOrganizationId
@@ -52,6 +53,7 @@ Resources:
     Properties:
       StackSetName: OrgCiCdGhaBuild
       Description: GHA CI/CD Deployment Build
+      CallAs: DELEGATED_ADMIN
       Parameters:
         - ParameterKey: DeployBucketArn
           ParameterValue: '/org/cicd/SamDeployBucketArn'
