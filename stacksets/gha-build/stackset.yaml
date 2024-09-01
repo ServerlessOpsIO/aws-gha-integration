@@ -36,8 +36,7 @@ Resources:
             OrganizationalUnitIds: !Ref TargetOuIds
           Regions: !Ref TargetRegions
       AutoDeployment:
-        Enabled: true
-        RetainStacksOnAccountRemoval: false
+        Enabled: false
       ManagedExecution:
         Active: true
       OperationPreferences:
@@ -63,8 +62,7 @@ Resources:
       Capabilities:
         - CAPABILITY_NAMED_IAM
       AutoDeployment:
-        Enabled: true
-        RetainStacksOnAccountRemoval: false
+        Enabled: false
       ManagedExecution:
         Active: true
       OperationPreferences:
