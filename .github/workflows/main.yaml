@@ -216,7 +216,7 @@ jobs:
             $AWS_CFN_PARAMS \
             $AWS_CFN_TAGS
 
-  deploy_stackset:
+  deploy_delegate:
     needs:
       - build
     runs-on: ubuntu-latest
