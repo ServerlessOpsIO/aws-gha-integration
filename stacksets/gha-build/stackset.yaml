@@ -32,12 +32,13 @@ Resources:
           ParameterValue: !Ref AwsOrganizationId
         - ParameterKey: BuildAccount
           ParameterValue: 'true'
-      StackInstancesGroup:
-        - DeploymentTargets:
-            OrganizationalUnitIds: !Ref TargetOuIds
-          Regions: !Ref TargetRegions
+      #StackInstancesGroup:
+      #  - DeploymentTargets:
+      #      OrganizationalUnitIds: !Ref TargetOuIds
+      #    Regions: !Ref TargetRegions
       AutoDeployment:
-        Enabled: false
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
       ManagedExecution:
         Active: true
       OperationPreferences:
@@ -57,14 +58,15 @@ Resources:
       Parameters:
         - ParameterKey: DeployBucketArn
           ParameterValue: '/org/cicd/SamDeployBucketArn'
-      StackInstancesGroup:
-        - DeploymentTargets:
-            OrganizationalUnitIds: !Ref TargetOuIds
-          Regions: !Ref TargetRegions
+      #StackInstancesGroup:
+      #  - DeploymentTargets:
+      #      OrganizationalUnitIds: !Ref TargetOuIds
+      #    Regions: !Ref TargetRegions
       Capabilities:
         - CAPABILITY_NAMED_IAM
       AutoDeployment:
-        Enabled: false
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
       ManagedExecution:
         Active: true
       OperationPreferences:
