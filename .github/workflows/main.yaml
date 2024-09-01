@@ -103,6 +103,7 @@ jobs:
           retention-days: 30
 
   deploy_management:
+    if: false
     needs:
       - build
     runs-on: ubuntu-latest
