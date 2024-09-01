@@ -33,10 +33,10 @@ Resources:
           ParameterValue: !Ref DeployBucketArn
       Capabilities:
         - CAPABILITY_NAMED_IAM
-      #StackInstancesGroup:
-      #  - DeploymentTargets:
-      #      OrganizationalUnitIds: !Ref TargetOuIds
-      #    Regions: !Ref TargetRegions
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref TargetOuIds
+          Regions: !Ref TargetRegions
       AutoDeployment:
         Enabled: true
         RetainStacksOnAccountRemoval: false
