@@ -23,7 +23,7 @@ Resources:
   OrgCiCdGhaDeploy:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: OrgCiCdGhaDeploy
+      StackSetName: CiCdGhaDeploy
       Description: GHA CI/CD Deployment
       CallAs: DELEGATED_ADMIN
       Parameters:

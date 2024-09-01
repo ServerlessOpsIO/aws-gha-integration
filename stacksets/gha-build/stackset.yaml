@@ -24,7 +24,7 @@ Resources:
   OrgCiCdSamArtifacts:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: OrgCiCdSamArtifacts
+      StackSetName: CiCdSamArtifacts
       Description: AWS SAM Deployment
       CallAs: DELEGATED_ADMIN
       Parameters:
@@ -51,7 +51,7 @@ Resources:
     Type: AWS::CloudFormation::StackSet
     DependsOn: OrgCiCdSamArtifacts
     Properties:
-      StackSetName: OrgCiCdGhaBuild
+      StackSetName: CiCdGhaBuild
       Description: GHA CI/CD Deployment Build
       CallAs: DELEGATED_ADMIN
       Parameters:
