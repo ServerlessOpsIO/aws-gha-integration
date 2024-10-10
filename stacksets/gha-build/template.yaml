@@ -126,6 +126,19 @@ Resources:
                 Resource:
                   - !Sub "${SarPublishingBucket.Arn}/serverlessopsio/*/main/*"
                   - !Sub "${SarPublishingBucket.Arn}/*.template"
+        - PolicyName: SarApplications
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'serverlessrepo:CreateApplication'
+                  - 'serverlessrepo:GetApplication'
+                  - 'serverlessrepo:ListApplications'
+                  - 'serverlessrepo:PublishApplication'
+                  - 'serverlessrepo:UpdateApplication'
+                  - 'serverlessrepo:DeleteApplication'
+                Resource: '*'
         - PolicyName: STS
           PolicyDocument:
             Version: "2012-10-17"
