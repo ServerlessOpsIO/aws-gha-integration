@@ -231,7 +231,7 @@ Resources:
               Service: serverlessrepo.amazonaws.com
             Condition:
               StringEquals:
-                "aws:PrincipalOrgID":
+                "aws:SourceOrgID":
                   - !Ref AwsOrganizationId
 
   ###
