@@ -100,7 +100,7 @@ Resources:
                   - 's3:List*'
                   - 's3:GetBucket*'
                 Resource:
-                  - !Ref SarPublishingBucket
+                  - !GetAtt SarPublishingBucket.Arn
         - PolicyName: SarS3DeployBucketObjects
           PolicyDocument:
             Version: "2012-10-17"
@@ -113,9 +113,9 @@ Resources:
                   - 's3:PutObject*'
                 Resource:
                   # We group artifacts by GitHub org in case we need to accommodate more orgs.
-                  - !Sub "${SarPublishingBucket}/serverlessopsio/*"
+                  - !Sub "${SarPublishingBucket.Arn}/serverlessopsio/*"
                   # SAM templates are written at the root.
-                  - !Sub "${SarPublishingBucket}/*.template"
+                  - !Sub "${SarPublishingBucket.Arn}/*.template"
         - PolicyName: SarS3DeployBucketObjectsDenyMainDelete
           PolicyDocument:
             Version: "2012-10-17"
@@ -124,8 +124,8 @@ Resources:
                 Action:
                   - 's3:DeleteObject'
                 Resource:
-                  - !Sub "${SarPublishingBucket}/serverlessopsio/*/main/*"
-                  - !Sub "${SarPublishingBucket}/*.template"
+                  - !Sub "${SarPublishingBucket.Arn}/serverlessopsio/*/main/*"
+                  - !Sub "${SarPublishingBucket.Arn}/*.template"
         - PolicyName: STS
           PolicyDocument:
             Version: "2012-10-17"
