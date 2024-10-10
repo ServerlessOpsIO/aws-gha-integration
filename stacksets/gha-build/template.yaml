@@ -11,6 +11,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Description: "ARN of deployment bucket"
 
+  AwsOrganizationId:
+    Type: String
+    Description: "AWS Org ID of accounts allowed to access S3 Bucket"
+
 Resources:
   ###
   # IAM Roles
@@ -144,6 +148,44 @@ Resources:
       Url: !Sub "https://${IdpName}"
 
 
+  SarPublishingBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'aws-sar-${AWS::AccountId}-${AWS::Region}'
+      # Have Bucket policy handle these things. Otherwise we can end up with conflicts that
+      # break configuration.
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: aws:kms
+      VersioningConfiguration:
+        Status: Enabled
+
+  SarPublishingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SarPublishingBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${SarPublishingBucket}/*"
+            Principal:
+              Service: serverlessrepo.amazonaws.com
+            Condition:
+              StringEquals:
+                "aws:PrincipalOrgID":
+                  - !Ref AwsOrganizationId
+
   ###
   #SSM Parameters
   ###
@@ -154,3 +196,11 @@ Resources:
       Type: "String"
       Description: "GitHubActions IAM Role ARN"
       Value: !GetAtt GitHubActionsBuildRole.Arn
+
+  SarPublishingBucketArnSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/org/cicd/SarPublishingBucketArn"
+      Type: "String"
+      Description: "SAR Publishing Bucket ARN"
+      Value: !GetAtt SarPublishingBucket.Arn

@@ -58,6 +58,8 @@ Resources:
       Parameters:
         - ParameterKey: DeployBucketArn
           ParameterValue: '/org/cicd/SamDeployBucketArn'
+        - ParameterKey: AwsOrganizationId
+          ParameterValue: !Ref AwsOrganizationId
       StackInstancesGroup:
         - DeploymentTargets:
             OrganizationalUnitIds: !Ref TargetOuIds
