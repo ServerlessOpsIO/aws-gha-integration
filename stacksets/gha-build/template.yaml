@@ -138,6 +138,7 @@ Resources:
                   - 'serverlessrepo:PublishApplication'
                   - 'serverlessrepo:UpdateApplication'
                   - 'serverlessrepo:DeleteApplication'
+                  - 'serverlessrepo:PutApplicationPolicy'
                 Resource: '*'
         - PolicyName: STS
           PolicyDocument:
