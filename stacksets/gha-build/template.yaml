@@ -226,7 +226,7 @@ Resources:
               - s3:GetObject
             Effect: Allow
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${SarPublishingBucket}/*"
+              - !Sub "${SarPublishingBucket.Arn}/*"
             Principal:
               Service: serverlessrepo.amazonaws.com
             Condition:
