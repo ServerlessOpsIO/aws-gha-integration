@@ -140,6 +140,7 @@ Resources:
                   - 'serverlessrepo:DeleteApplication'
                   - 'serverlessrepo:PutApplicationPolicy'
                   - 'serverlessrepo:CreateApplicationVersion'
+                  - 'serverlessrepo:CreateCloudFormationTemplate'
                 Resource: '*'
         - PolicyName: STS
           PolicyDocument:
