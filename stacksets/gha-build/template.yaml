@@ -186,7 +186,7 @@ Resources:
                   - 'ecr:CreateRepository'
                   - 'ecr:SetRepositoryPolicy'
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/serverlessops/*"
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/serverlessopsio/*"
 
   GitHubActionsOidcProvider:
     Type: AWS::IAM::OIDCProvider
