@@ -1,0 +1,78 @@
+Metadata:
+  GhaStack:
+    localTemplateFile: &gha_stackset_body ./stacksets/gha-build/stackset.yaml
+  SamStack:
+    localTemplateFile: &sam_template_body ./stacksets/gha-build/sam-deployment.yaml
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+  - 'AWS::Serverless-2016-10-31'
+Description: GitHib Actions integration stacks
+
+Parameters:
+  CiCdOuIds:
+    Type: CommaDelimitedList
+    Description: Comma separated list of OUs
+  TargetRegions:
+    Type: CommaDelimitedList
+    Description: Comma separated list of regions
+  AwsOrganizationId:
+    Type: String
+    Description: AWS Organization ID
+
+Resources:
+  OrgCiCdSamArtifacts:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: CiCdSamArtifacts
+      Description: AWS SAM Deployment
+      Parameters:
+        - ParameterKey: AwsOrganizationId
+          ParameterValue: !Ref AwsOrganizationId
+        - ParameterKey: BuildAccount
+          ParameterValue: 'true'
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref CiCdOuIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      TemplateBody: *sam_template_body
+
+
+  OrgCiCdGhaBuild:
+    Type: AWS::CloudFormation::StackSet
+    DependsOn: OrgCiCdSamArtifacts
+    Properties:
+      StackSetName: CiCdGhaBuild
+      Description: GHA CI/CD Deployment Build
+      Parameters:
+        - ParameterKey: DeployBucketArn
+          ParameterValue: '/org/cicd/SamDeployBucketArn'
+        - ParameterKey: AwsOrganizationId
+          ParameterValue: !Ref AwsOrganizationId
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref CiCdOuIds
+          Regions: !Ref TargetRegions
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      TemplateBody: *gha_stackset_body
