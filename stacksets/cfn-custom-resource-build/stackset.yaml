@@ -28,7 +28,6 @@ Resources:
             Action:
               - sns:Publish
               - sns:Subscribe
-              - sns:Unsubscribe
             Resource: !Ref CustomResourceTopic
             Condition:
               StringEquals:
