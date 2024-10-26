@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CFN Custom Resources Support
+
+Parameters:
+  CustomResourceSsmParamName:
+    Type: String
+    Description: ARN of Custom Resource target
+  CustomResourceTopicName:
+    Type: String
+    Description: ARN of Custom Resource target
+  CicdAwsAccountId:
+    Type: String
+    Description: AWS Account ID for CI/CD
+
+Resources:
+  CfnCustomResourceArn:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref CustomResourceSsmParamName
+      Type: String
+      Description: ARN of CFN Custom Resource target
+      Value: !Sub "arn:aws:sns:${AWS::Region}:${CicdAwsAccountId}:${CustomResourceTopicName}"

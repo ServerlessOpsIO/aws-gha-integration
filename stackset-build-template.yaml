@@ -1,8 +1,10 @@
 Metadata:
   GhaStack:
-    localTemplateFile: &gha_stackset_body ./stacksets/gha-build/stackset.yaml
+    localTemplateFile: &gha_template_body ./stacksets/gha-build/stackset.yaml
   SamStack:
     localTemplateFile: &sam_template_body ./stacksets/gha-build/sam-deployment.yaml
+  CfnCrStack:
+    localTemplateFile: &cfn_cr_template_body ./stacksets/cfn-custom-resource-build/stackset.yaml
 
 AWSTemplateFormatVersion: '2010-09-09'
 Transform:
@@ -19,6 +21,9 @@ Parameters:
   AwsOrganizationId:
     Type: String
     Description: AWS Organization ID
+  CustomResourceTopicName:
+    Type: String
+    Description: Custom resource ARN
 
 Resources:
   OrgCiCdSamArtifacts:
@@ -75,4 +80,33 @@ Resources:
         FailureToleranceCount: 1
         MaxConcurrentCount: 5
       PermissionModel: SERVICE_MANAGED
-      TemplateBody: *gha_stackset_body
+      TemplateBody: *gha_template_body
+
+
+  DeployAccountCfnCustomResourcesSupport:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: OrgBuildAccountCfnCustomResources
+      Description: Provides shared AWS CFN Custom Resources
+      Parameters:
+        - ParameterKey: AwsOrganizationId
+          ParameterValue: !Ref AwsOrganizationId
+        - ParameterKey: CustomResourceTopicName
+          ParameterValue: !Ref CustomResourceTopicName
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref CiCdOuIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      PermissionModel: SERVICE_MANAGED
+      TemplateBody: *cfn_cr_template_body

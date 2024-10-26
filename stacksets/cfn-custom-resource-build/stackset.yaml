@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CFN Custom Resources Support
+
+Parameters:
+  AwsOrganizationId:
+    Type: String
+    Description: AWS Organization ID
+  CustomResourceTopicName:
+    Type: String
+    Description: Name of the SNS topic for custom resources
+
+Resources:
+  CustomResourceTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref CustomResourceTopicName
+      DisplayName: CFN Custom Resource Topic
+
+  CustomResourceTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFormation
+            Effect: Allow
+            Principal: "*"
+            Action: sns:Publish
+            Resource: !Ref CustomResourceTopic
+            Condition:
+              StringEquals:
+                "aws:PrincipalOrgID":
+                  - !Ref AwsOrganizationId
+              StringLike:
+                "aws:PrincipalArn":
+                  - !Sub "arn:${AWS::Partition}:iam::*:role/CfnExecIamRole"
+          - Sid: AllowServiceCatalog
+            Effect: Allow
+            Principal: "*"
+            Action: sns:Publish
+            Resource: !Ref CustomResourceTopic
+            Condition:
+              StringEquals:
+                "aws:PrincipalOrgID":
+                  - !Ref AwsOrganizationId
+              StringLike:
+                "aws:PrincipalArn":
+                  - !Sub "arn:${AWS::Partition}:iam::*:role/ServiceCatalogCfnExecIamRole"
+      Topics:
+        - !Ref CustomResourceTopic

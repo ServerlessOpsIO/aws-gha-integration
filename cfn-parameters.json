@@ -3,5 +3,7 @@
     "TargetRegions": "us-east-1",
     "AwsOrganizationId": $secrets.AWS_ORG_ID,
     "CiCdOuIds": $secrets.AWS_ORG_CICD_OU_ID,
-    "CicdAwsAccountId": $secrets.AWS_CICD_ACCOUNT_ID
+    "CicdAwsAccountId": $secrets.AWS_CICD_ACCOUNT_ID,
+    "CustomResourceTopicName": "CfnCustomResource",
+    "CustomResourceSsmParamName": "/org/cicd/CustomResourceTopic"
 }
