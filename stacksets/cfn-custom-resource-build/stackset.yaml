@@ -25,7 +25,10 @@ Resources:
           - Sid: AllowCloudFormation
             Effect: Allow
             Principal: "*"
-            Action: sns:Publish
+            Action:
+              - sns:Publish
+              - sns:Subscribe
+              - sns:Unsubscribe
             Resource: !Ref CustomResourceTopic
             Condition:
               StringEquals:
