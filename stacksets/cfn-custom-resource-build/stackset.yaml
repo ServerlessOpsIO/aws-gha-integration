@@ -25,9 +25,7 @@ Resources:
           - Sid: AllowCloudFormation
             Effect: Allow
             Principal: "*"
-            Action:
-              - sns:Publish
-              - sns:Subscribe
+            Action: sns:Publish
             Resource: !Ref CustomResourceTopic
             Condition:
               StringEquals:
@@ -36,6 +34,18 @@ Resources:
               StringLike:
                 "aws:PrincipalArn":
                   - !Sub "arn:${AWS::Partition}:iam::*:role/CfnExecIamRole"
+          - Sid: AllowStackSetSubscribe
+            Effect: Allow
+            Principal: "*"
+            Action: sns:Subscribe
+            Resource: !Ref CustomResourceTopic
+            Condition:
+              StringEquals:
+                "aws:PrincipalOrgID":
+                  - !Ref AwsOrganizationId
+              StringLike:
+                "aws:PrincipalArn":
+                  - !Sub "arn:${AWS::Partition}:iam::*:role/stacksets-exec-*"
           - Sid: AllowServiceCatalog
             Effect: Allow
             Principal: "*"
