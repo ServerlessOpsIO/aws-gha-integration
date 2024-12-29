@@ -9,5 +9,5 @@ metadata:
 spec:
   type: api
   lifecycle: production
-  owner: group:admins
+  owner: group:00gjdgxs1ur6lsu
   system: system:github-actions
