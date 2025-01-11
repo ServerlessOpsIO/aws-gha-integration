@@ -7,7 +7,7 @@ metadata:
   annotations:
     github.com/project-slug: ServerlessOpsIO/aws-gha-integration
 spec:
-  type: api
+  type: cloud-config
   lifecycle: production
   owner: group:00gjdgxs1ur6lsu
   system: system:github-actions
