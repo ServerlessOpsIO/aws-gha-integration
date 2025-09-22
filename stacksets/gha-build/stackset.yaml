@@ -133,14 +133,15 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'serverlessrepo:CreateApplication'
-                  - 'serverlessrepo:GetApplication'
-                  - 'serverlessrepo:ListApplications'
-                  - 'serverlessrepo:PublishApplication'
-                  - 'serverlessrepo:UpdateApplication'
-                  - 'serverlessrepo:DeleteApplication'
-                  - 'serverlessrepo:PutApplicationPolicy'
                   - 'serverlessrepo:CreateApplicationVersion'
                   - 'serverlessrepo:CreateCloudFormationTemplate'
+                  - 'serverlessrepo:DeleteApplication'
+                  - 'serverlessrepo:GetApplication'
+                  - 'serverlessrepo:ListApplications'
+                  - 'serverlessrepo:ListApplicationVersions'
+                  - 'serverlessrepo:PutApplicationPolicy'
+                  - 'serverlessrepo:UnshareApplication'
+                  - 'serverlessrepo:UpdateApplication'
                 Resource: '*'
         - PolicyName: STS
           PolicyDocument:

@@ -14,31 +14,8 @@ jobs:
       contents: read
 
     steps:
-      - name: Set extra GitHub environment variables
-        id: github-env-vars
-        uses: rlespinasse/github-slug-action@v4
-
-      - name: Checkout source
-        id: checkout-source
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        id: install-python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.12
-          cache: pipenv
-
-      - name: Install pipenv
-        id: install-pipenv
-        shell: bash
-        run: python -m pip install --upgrade pipenv
-
-
-      - name: Install dependencies
-        id: install-python-deps
-        shell: bash
-        run: pipenv install --dev
+      - name: Setup job workspace
+        uses: ServerlessOpsIO/gha-setup-workspace@v1
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -129,33 +106,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Set extra GitHub environment variables
-        id: github-env-vars
-        uses: rlespinasse/github-slug-action@v4
-
-      - name: Download artifact
-        id: download-artifact
-        uses: actions/download-artifact@v4
+      - name: Setup job workspace
+        uses: ServerlessOpsIO/gha-setup-workspace@v1
         with:
-          name: ${{ env.GITHUB_REPOSITORY_SLUG }}-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ github.sha }}
-
-      - name: Setup Python
-        id: install-python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.12
-          cache: pipenv
-
-      - name: Install pipenv
-        id: install-pipenv
-        shell: bash
-        run: python -m pip install --upgrade pipenv
-
-
-      - name: Install dependencies
-        id: install-python-deps
-        shell: bash
-        run: pipenv install --dev
+          checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -186,33 +140,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Set extra GitHub environment variables
-        id: github-env-vars
-        uses: rlespinasse/github-slug-action@v4
-
-      - name: Download artifact
-        id: download-artifact
-        uses: actions/download-artifact@v4
+      - name: Setup job workspace
+        uses: ServerlessOpsIO/gha-setup-workspace@v1
         with:
-          name: ${{ env.GITHUB_REPOSITORY_SLUG }}-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ github.sha }}
-
-      - name: Setup Python
-        id: install-python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.12
-          cache: pipenv
-
-      - name: Install pipenv
-        id: install-pipenv
-        shell: bash
-        run: python -m pip install --upgrade pipenv
-
-
-      - name: Install dependencies
-        id: install-python-deps
-        shell: bash
-        run: pipenv install --dev
+          checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -243,33 +174,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Set extra GitHub environment variables
-        id: github-env-vars
-        uses: rlespinasse/github-slug-action@v4
-
-      - name: Download artifact
-        id: download-artifact
-        uses: actions/download-artifact@v4
+      - name: Setup job workspace
+        uses: ServerlessOpsIO/gha-setup-workspace@v1
         with:
-          name: ${{ env.GITHUB_REPOSITORY_SLUG }}-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ github.sha }}
-
-      - name: Setup Python
-        id: install-python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.12
-          cache: pipenv
-
-      - name: Install pipenv
-        id: install-pipenv
-        shell: bash
-        run: python -m pip install --upgrade pipenv
-
-
-      - name: Install dependencies
-        id: install-python-deps
-        shell: bash
-        run: pipenv install --dev
+          checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -298,33 +206,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Set extra GitHub environment variables
-        id: github-env-vars
-        uses: rlespinasse/github-slug-action@v4
-
-      - name: Download artifact
-        id: download-artifact
-        uses: actions/download-artifact@v4
+      - name: Setup job workspace
+        uses: ServerlessOpsIO/gha-setup-workspace@v1
         with:
-          name: ${{ env.GITHUB_REPOSITORY_SLUG }}-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ github.sha }}
-
-      - name: Setup Python
-        id: install-python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.12
-          cache: pipenv
-
-      - name: Install pipenv
-        id: install-pipenv
-        shell: bash
-        run: python -m pip install --upgrade pipenv
-
-
-      - name: Install dependencies
-        id: install-python-deps
-        shell: bash
-        run: pipenv install --dev
+          checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
