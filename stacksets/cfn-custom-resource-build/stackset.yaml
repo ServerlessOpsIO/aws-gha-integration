@@ -58,5 +58,6 @@ Resources:
               StringLike:
                 "aws:PrincipalArn":
                   - !Sub "arn:${AWS::Partition}:iam::*:role/ServiceCatalogCfnExecIamRole"
+                  - !Sub "arn:${AWS::Partition}:iam::*:role/ServiceCatalogCfnExecIamRole-us-east-*"
       Topics:
         - !Ref CustomResourceTopic
