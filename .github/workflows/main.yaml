@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
+        uses: ServerlessOpsIO/gha-setup-workspace@v2
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
@@ -25,24 +25,18 @@ jobs:
       - name: Install AWS SAM
         uses: aws-actions/setup-sam@v2
 
-      - name: Validate artifact (deploy)
-        run: sam validate --lint -t stackset-deploy-template.yaml
+      - name: Validate template
+        run: sam validate --lint
 
-      - name: Validate artifact (build)
-        run: sam validate --lint -t stackset-build-template.yaml
+      - name: Validate stacksets template
+        run: sam validate --lint --template stacksets.yaml
 
-      - name: Validate artifact (SAM artifact)
-        run: sam validate --lint -t stacksets/gha-build/sam-deployment.yaml
-
-      - name: Validate artifact (build stackset)
-        run: sam validate --lint -t stacksets/gha-build/stackset.yaml
-
-      - name: Validate artifact (deploy stackset)
-        run: sam validate --lint -t stacksets/gha-deploy/stackset.yaml
+      - name: Validate child templates
+        run: find ./stacksets -type f -exec sam validate --lint --template-file '{}' \;
 
       - name: Synethsize StackSet templates
         run: |
-          for _f in $(find . -type f -name 'stackset-*-template.yaml'); do
+          for _f in $(find . -type f -name 'stacksets.yaml'); do
             _dir="$(dirname $_f)/" \
             yq \
               -i \
@@ -50,54 +44,19 @@ jobs:
               $_f;
           done
 
-      - name: Upload SAM artifact (Management Account / GHA Deploy)
-        id: upload-sam-gha-template
-        shell: bash
-        run: |
-          sam package \
-            --template stacksets/gha-deploy/stackset.yaml \
-            --s3-bucket aws-sam-cli-sourcebucket-774305573766-us-east-1  \
-            --s3-prefix ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}/${{ env.GITHUB_REF_SLUG_URL }} \
-            --region us-east-1 \
-            --output-template-file packaged-gha-deploy-template.yaml
-
-      - name: Upload SAM artifact (Management Account / CFN CR)
-        id: upload-sam-cfncr-template
-        shell: bash
-        run: |
-          sam package \
-            --template stacksets/cfn-custom-resource-deploy/stackset.yaml \
-            --s3-bucket aws-sam-cli-sourcebucket-774305573766-us-east-1  \
-            --s3-prefix ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}/${{ env.GITHUB_REF_SLUG_URL }} \
-            --region us-east-1 \
-            --output-template-file packaged-cfncr-template.yaml
-
-      - name: Upload SAM artifact (Build Account)
-        id: upload-sam-stackset-build-template
-        shell: bash
-        run: |
-          sam package \
-            --template stackset-build-template.yaml \
-            --s3-bucket aws-sam-cli-sourcebucket-774305573766-us-east-1  \
-            --s3-prefix ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}/${{ env.GITHUB_REF_SLUG_URL }} \
-            --region us-east-1 \
-            --output-template-file packaged-stackset-build-template.yaml
-
-      - name: Upload SAM artifact (Deploy Account)
-        id: upload-sam-stackset-deploy-template
-        shell: bash
-        run: |
-          sam package \
-            --template stackset-deploy-template.yaml \
-            --s3-bucket aws-sam-cli-sourcebucket-774305573766-us-east-1  \
-            --s3-prefix ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}/${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}/${{ env.GITHUB_REF_SLUG_URL }} \
-            --region us-east-1 \
-            --output-template-file packaged-stackset-deploy-template.yaml
+      - name: Package Stackset template
+        id: package-stackset
+        uses: ServerlessOpsIO/gha-package-aws-sam@v1
+        with:
+          template_file: stacksets.yaml
+          packaged_template_file: packaged-stacksets.yaml
 
       - name: Store Artifacts
-        uses: ServerlessOpsIO/gha-store-artifacts@v1
+        uses: ServerlessOpsIO/gha-store-artifacts@v2
+        with:
+          use_aws_sam: true
 
-  deploy_build_stacksets:
+  deploy_stacksets:
     needs:
       - build
     runs-on: ubuntu-latest
@@ -107,14 +66,15 @@ jobs:
 
     steps:
       - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
+        uses: ServerlessOpsIO/gha-setup-workspace@v2
         with:
           checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
         with:
-          build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
+          #build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
+          build_aws_account_id: 225989329251
           gha_build_role_name: ${{ secrets.AWS_CICD_BUILD_ROLE_NAME }}
           deploy_aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
           gha_deploy_role_name: ${{ secrets.AWS_CICD_DEPLOY_ROLE_NAME }}
@@ -123,17 +83,17 @@ jobs:
         uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
         with:
           aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          template_file: packaged-stackset-build-template.yaml
-          stack_name: "${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}-${{ env.GITHUB_EVENT_REF_SLUG_URL }}-stackset-build"
+          stack_name: "${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}-stacksets-${{ env.GITHUB_EVENT_REF_SLUG_URL }}"
+          template_file: packaged-stacksets.yaml
           cfn_capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
           env_json: ${{ toJson(env) }}
+          vars_json: ${{ toJson(vars) }}
           secrets_json: ${{ toJson(secrets) }}
 
 
-  deploy_deploy_stacksets:
+  deploy_management:
     needs:
-      - build
-      - deploy_build_stacksets
+      - deploy_stacksets
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -141,90 +101,23 @@ jobs:
 
     steps:
       - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
+        uses: ServerlessOpsIO/gha-setup-workspace@v2
         with:
           checkout_artifact: true
 
       - name: Assume AWS Credentials
         uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
         with:
-          build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
-          gha_build_role_name: ${{ secrets.AWS_CICD_BUILD_ROLE_NAME }}
+          #build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
+          build_aws_account_id: 225989329251
           deploy_aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          gha_deploy_role_name: ${{ secrets.AWS_CICD_DEPLOY_ROLE_NAME }}
-
-      - name: Deploy via AWS SAM
-        uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
-        with:
-          aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          stack_name: "${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}-${{ env.GITHUB_EVENT_REF_SLUG_URL }}-stackset-deploy"
-          template_file: packaged-stackset-deploy-template.yaml
-          cfn_capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-          env_json: ${{ toJson(env) }}
-          secrets_json: ${{ toJson(secrets) }}
-
-
-  deploy_management_gha_deploy:
-    needs:
-      - build
-      - deploy_build_stacksets
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
-        with:
-          checkout_artifact: true
-
-      - name: Assume AWS Credentials
-        uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
-        with:
-          build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
-          gha_build_role_name: ${{ secrets.AWS_CICD_BUILD_ROLE_NAME }}
-          deploy_aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          gha_deploy_role_name: ${{ secrets.AWS_CICD_DEPLOY_ROLE_NAME }}
 
       - name: Deploy via AWS SAM (GHA Deploy)
         uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
         with:
           aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          template_file: packaged-gha-deploy-template.yaml
           cfn_capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
           env_json: ${{ toJson(env) }}
+          vars_json: ${{ toJson(vars) }}
           secrets_json: ${{ toJson(secrets) }}
 
-  deploy_management_cfn_cr:
-    needs:
-      - build
-      - deploy_build_stacksets
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Setup job workspace
-        uses: ServerlessOpsIO/gha-setup-workspace@v1
-        with:
-          checkout_artifact: true
-
-      - name: Assume AWS Credentials
-        uses: ServerlessOpsIO/gha-assume-aws-credentials@v1
-        with:
-          build_aws_account_id: ${{ secrets.AWS_CICD_ACCOUNT_ID }}
-          gha_build_role_name: ${{ secrets.AWS_CICD_BUILD_ROLE_NAME }}
-          deploy_aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          gha_deploy_role_name: ${{ secrets.AWS_CICD_DEPLOY_ROLE_NAME }}
-
-      - name: Deploy via AWS SAM (GHA Deploy)
-        uses: ServerlessOpsIO/gha-deploy-aws-sam@v1
-        with:
-          aws_account_id: ${{ secrets.AWS_MANAGEMENT_ACCOUNT_ID }}
-          stack_name: "${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}-${{ env.GITHUB_EVENT_REF_SLUG_URL }}-cfn-cr"
-          template_file: packaged-cfncr-template.yaml
-          cfn_capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-          env_json: ${{ toJson(env) }}
-          secrets_json: ${{ toJson(secrets) }}

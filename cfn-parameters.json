@@ -1,9 +1,8 @@
 {
     "TargetOuIds": $secrets.AWS_ORG_ROOT_ID,
     "TargetRegions": "us-east-1",
-    "AwsOrganizationId": $secrets.AWS_ORG_ID,
-    "CiCdOuIds": $secrets.AWS_ORG_CICD_OU_ID,
     "CicdAwsAccountId": $secrets.AWS_CICD_ACCOUNT_ID,
+    "DeployBucketName": $secrets.AWS_CICD_SAM_BUCKET,
     "CustomResourceTopicName": "CfnCustomResource",
     "CustomResourceSsmParamName": "/org/cicd/CustomResourceTopic"
 }

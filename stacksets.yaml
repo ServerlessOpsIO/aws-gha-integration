@@ -1,12 +1,12 @@
 Metadata:
   GhaStack:
-    localTemplateFile: &gha_deploy_template_body ./stacksets/gha-deploy/stackset.yaml
+    localTemplateFile: &gha_deploy_template_body ./stacksets/gha-deploy-iam/template.yaml
   CfnCrStack:
-    localTemplateFile: &cfn_cr_template_body ./stacksets/cfn-custom-resource-deploy/stackset.yaml
+    localTemplateFile: &cfn_cr_template_body ./stacksets/cfn-custom-resource/template.yaml
 
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWS account infrastructure stackset (GHA Deployments)
+Description: AWS GHA deployment integration StackSets
 
 Parameters:
   TargetOuIds:
@@ -18,9 +18,9 @@ Parameters:
   CicdAwsAccountId:
     Type: String
     Description: AWS Account ID for CI/CD
-  DeployBucketArn:
+  DeployBucketName:
     Type: String
-    Description: S3 bucket ARN for deployment
+    Description: S3 bucket name for for SAM deployments
   CustomResourceSsmParamName:
     Type: String
     Description: SSM parameter name for custom resource
@@ -39,7 +39,7 @@ Resources:
         - ParameterKey: CicdAwsAccountId
           ParameterValue: !Ref CicdAwsAccountId
         - ParameterKey: DeployBucketArn
-          ParameterValue: !Ref DeployBucketArn
+          ParameterValue: !Sub "arn:aws:s3:::${DeployBucketName}"
       Capabilities:
         - CAPABILITY_NAMED_IAM
       StackInstancesGroup:

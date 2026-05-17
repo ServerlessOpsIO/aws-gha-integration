@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+  - 'AWS::Serverless-2016-10-31'
+Description: GitHib Actions integration stacks
+
+Parameters:
+  CicdAwsAccountId:
+    Type: String
+    Description: AWS Account ID for CI/CD
+  DeployBucketArn:
+    Type: String
+    Description: S3 bucket ARN for deployment
+  CustomResourceSsmParamName:
+    Type: String
+    Description: SSM parameter name for custom resource
+  CustomResourceTopicName:
+    Type: String
+    Description: Custom resource ARN
+
+Resources:
+  GhaDeployIamStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./stacksets/gha-deploy-iam/template.yaml
+      Parameters:
+        CicdAwsAccountId: !Ref CicdAwsAccountId
+        DeployBucketArn: !Ref DeployBucketArn
+
+  CfnCustomResourcesStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./stacksets/cfn-custom-resource/template.yaml
+      Parameters:
+        CicdAwsAccountId: !Ref CicdAwsAccountId
+        CustomResourceTopicName: !Ref CustomResourceTopicName
+        CustomResourceSsmParamName: !Ref CustomResourceSsmParamName
